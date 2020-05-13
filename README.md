@@ -62,7 +62,7 @@ Download the pre-trained English BERT parameters from [here](https://share.weiyu
 
 Download the ``ag_news.zip`` from [here](https://share.weiyun.com/ZctQJP8h), and then unzip it to the ``datasets`` directory. 
 
-Run the following command to validate our FastBERT with ``Speed=0.5`` on the Book review datasets.
+Run the following command to validate our FastBERT with ``Speed=0.5`` on the Ag.news datasets.
 ```sh
 $ CUDA_VISIBLE_DEVICES="0" python3 -u run_fastbert.py \
         --pretrained_model_path ./models/English_uncased_base_model.bin \
