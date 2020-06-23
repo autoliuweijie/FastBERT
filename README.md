@@ -1,7 +1,7 @@
 # FastBERT
 ![](https://img.shields.io/badge/license-MIT-000000.svg)
 
-Source code for ["FastBERT: a Self-distilling BERT with Adaptive Inference Time"](https://arxiv.org/abs/2004.02178).
+Source code for ["FastBERT: a Self-distilling BERT with Adaptive Inference Time"](https://www.aclweb.org/anthology/2020.acl-main.537/).
 
 
 ## Requirements
