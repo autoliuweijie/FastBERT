@@ -1,0 +1,2 @@
+include fastbert/files/*.txt
+include fastbert/files/*.json
