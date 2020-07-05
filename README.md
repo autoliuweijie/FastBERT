@@ -3,7 +3,10 @@
 
 Source code for ["FastBERT: a Self-distilling BERT with Adaptive Inference Time"](https://www.aclweb.org/anthology/2020.acl-main.537/).
 
-**Update**: Pypi version of FastBERT has been launched. Please see [FastBERT_pypi](https://github.com/autoliuweijie/FastBERT_pypi).
+
+## Good News
+
+**2020/07/05 - Update**: Pypi version of FastBERT has been launched. Please see [fastbert-pypi](https://pypi.org/project/fastbert/).
 
 
 ## Requirements
