@@ -20,7 +20,7 @@ def load_dataset(path):
 
 
 def main():
-    
+
     train_dataset_path = '../datasets/douban_book_review/train.tsv'
     dev_dataset_path = '../datasets/douban_book_review/dev.tsv'
     test_dataset_path = '../datasets/douban_book_review/test.tsv'

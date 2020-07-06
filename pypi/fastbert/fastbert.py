@@ -17,7 +17,7 @@ from .uer.model_loader import load_model
 
 class MiniClassifier(nn.Module):
 
-    def __init__(self, 
+    def __init__(self,
                  args,
                  input_size,
                  labels_num):
@@ -97,7 +97,7 @@ class FastBERT(nn.Module):
         self.kernel = build_model(self.args)
         check_or_download(
                 self.args.pretrained_model_path,
-                self.args.pretrained_model_url, 
+                self.args.pretrained_model_url,
                 self.args.pretrained_model_md5,
                 kernel_name,
                 self.args.pretrained_model_url_bak)
@@ -160,7 +160,7 @@ class FastBERT(nn.Module):
             batch_size, learning_rate, finetuning_epochs_num,
             warmup, report_steps, model_saving_path, verbose)
 
-        self.self_distillation(
+        self._self_distillation(
             sentences_train, batch_size, learning_rate*10, distilling_epochs_num,
             warmup, report_steps, model_saving_path, sentences_dev,
             labels_dev, dev_speed, verbose
@@ -186,6 +186,46 @@ class FastBERT(nn.Module):
         label_id, exec_layer_num = self._fast_infer(sentence, speed)
         label = self.id2label[label_id]
         return label, exec_layer_num
+
+    def self_distill(self,
+                     sentences_train,
+                     model_saving_path,
+                     sentences_dev=[],
+                     labels_dev=[],
+                     batch_size=32,
+                     learning_rate=1e-4,
+                     warmup=0.1,
+                     epochs_num=5,
+                     report_steps=100,
+                     dev_speed=0.5,
+                     verbose=True):
+        """
+        Self-distilling the FastBERT model.
+
+        args:
+            sentences_train - list - a list of training sentences.
+            batch_size - int - batch_size for training.
+            sentences_dev - list - a list of validation sentences.
+            labels_dev - list - a list of validation labels.
+            learning_rate - float - learning rate.
+            finetuning_epochs_num - int - the epoch number of finetuning.
+            distilling_epochs_num - int - the epoch number of distilling.
+            report_steps - int - Report the training process every [report_steps] steps.
+            warmup - float - the warmup rate for training.
+            dev_speed - float - the speed for evaluating in the self-distilling process.
+            model_saving_path - str - the path to saving model.
+            verbose - bool- whether print infos.
+        """
+
+        self._self_distillation(
+            sentences_train, batch_size, learning_rate, epochs_num,
+            warmup, report_steps, model_saving_pathm, sentences_dev,
+            labels_dev, dev_speed, verbose
+        )
+
+        save_model(self, model_saving_path)
+        if verbose:
+            print("[FastBERT]: Model have been saved at {}".format(model_saving_path))
 
     def load_model(self,
                    model_path):
@@ -243,11 +283,11 @@ class FastBERT(nn.Module):
                 probs = F.softmax(logits, dim=1) # batch_size x labels_num
                 uncertainty = calc_uncertainty(probs, \
                         labels_num=self.labels_num).item()
-                
+
                 if uncertainty < speed:
                     exec_layer_num = i + 1
                     break
-                
+
         label_id = torch.argmax(probs, dim=1).item()
         label = self.id2label[label_id]
         return label, exec_layer_num
@@ -275,7 +315,7 @@ class FastBERT(nn.Module):
 
             # training backbone of fastbert
             label_ids_batch = [self.label_map[label] for label in labels_batch]
-            label_ids_batch = torch.tensor(label_ids_batch, dtype=torch.int64, 
+            label_ids_batch = torch.tensor(label_ids_batch, dtype=torch.int64,
                     device=self.args.device)
 
             hiddens_batch = embs_batch
@@ -284,7 +324,7 @@ class FastBERT(nn.Module):
                         hiddens_batch, masks_batch)
             logits_batch = self.classifiers[-1](hiddens_batch, masks_batch)
             loss = self.criterion(
-                    self.softmax(logits_batch.view(-1, self.labels_num)), 
+                    self.softmax(logits_batch.view(-1, self.labels_num)),
                     label_ids_batch.view(-1)
                 )
 
@@ -304,7 +344,7 @@ class FastBERT(nn.Module):
                         hiddens_batch_list[-1], masks_batch
                     ).view(-1, self.labels_num)
                 teacher_probs = F.softmax(teacher_logits, dim=1)
-            
+
             loss = 0
             for i in range(self.kernel.encoder.layers_num - 1):
                 student_logits = self.classifiers[i](
@@ -365,7 +405,7 @@ class FastBERT(nn.Module):
                 correct_bias=False)
         scheduler = WarmupLinearSchedule(optimizer, \
                 warmup_steps=train_steps*warmup, t_total=train_steps)
-        
+
         # fine-tuning
         best_acc = 0.0
         for epoch in range(epochs_num):
@@ -384,7 +424,7 @@ class FastBERT(nn.Module):
                     report_loss = 0.
                     if verbose:
                         print("[FastBERT]: Fine-tuning epoch {}/{}".\
-                                format(epoch+1, epochs_num), 
+                                format(epoch+1, epochs_num),
                                 "step {}/{}: loss = {:.3f}". \
                                 format(step+1, steps_num, ave_loss))
 
@@ -397,25 +437,25 @@ class FastBERT(nn.Module):
             train_acc, _ = self._evaluate(sentences_train, labels_train, speed=0.0)
             if verbose:
                 print("[FastBERT]: Evaluating at fine-tuning epoch {}/{}".\
-                format(epoch+1, epochs_num), 
+                format(epoch+1, epochs_num),
                 ": train_acc = {:.3f}, dev_acc = {:.3f}". \
                 format(train_acc, dev_acc))
 
             if dev_num > 0:
                 if dev_acc > best_acc:
                     # saving model
-                    if verbose: 
+                    if verbose:
                         print("[FastBERT]: dev_acc ({}) > best_acc ({}),".\
-                              format(dev_acc, best_acc), 
+                              format(dev_acc, best_acc),
                               "saving model to {}.".\
                               format(model_saving_path))
                     save_model(self, model_saving_path)
                     best_acc = dev_acc
             else:
                 if train_acc > best_acc:
-                    if verbose: 
+                    if verbose:
                         print("[FastBERT]: train_acc ({}) > best_acc ({}),".\
-                              format(train_acc, best_acc), 
+                              format(train_acc, best_acc),
                               "saving model to {}.".\
                               format(model_saving_path))
                     save_model(self, model_saving_path)
@@ -443,7 +483,7 @@ class FastBERT(nn.Module):
         ave_exec_layers = np.mean(exec_layers)
         return acc, ave_exec_layers
 
-    def self_distillation(self,
+    def _self_distillation(self,
                           sentences_train,
                           batch_size,
                           learning_rate,
@@ -462,7 +502,7 @@ class FastBERT(nn.Module):
         instances_num = len(sentences_train)
         dev_num = len(sentences_dev)
         train_steps = int(instances_num * epochs_num / batch_size) + 1
-        steps_num = instances_num // batch_size 
+        steps_num = instances_num // batch_size
 
         # create optimizer
         param_optimizer = list(self.named_parameters())
@@ -495,7 +535,7 @@ class FastBERT(nn.Module):
                     report_loss = 0.
                     if verbose:
                         print("[FastBERT]: Self-distilling epoch {}/{}".\
-                                format(epoch+1, epochs_num), 
+                                format(epoch+1, epochs_num),
                                 "step {}/{}: loss = {:.3f}". \
                                 format(step+1, steps_num, ave_loss))
 
@@ -510,7 +550,7 @@ class FastBERT(nn.Module):
                     "dev_acc = {:.3f}, ave_exec_layers = {:.3f}".format(dev_acc, ave_layers))
             save_model(self, model_saving_path)
             print("[FastBERT]: Saving model to {}".format(model_saving_path))
-    
+
     def show(self):
         print("[FastBER]: The configs of model are listed:")
         for k, v in vars(self.args).items():
