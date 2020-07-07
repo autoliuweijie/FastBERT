@@ -49,11 +49,49 @@ label, exec_layers = model('I like FastBERT', speed=0.7)
 ```
 
 
-## Two sentence flassification
+## Two sentences classification
 
 ```python
+from fastbert import FastBERT_S2
 
-wait...
+# Loading your dataset
+labels = ['T', 'F']
+questions_train = [
+    'FastBERT快吗?',
+    '你在业务里使用FastBERT了吗?',
+    ...
+]
+answers_train = [
+    '快！而且速度还可调.',
+    '用了啊，帮我省了好几百台机器.',
+    ...
+]
+labels_train = [
+    'T',
+    'T',
+    ...
+]
+
+# Creating and training model
+model = FastBERT_S2(
+    kernel_name="google_bert_base_zh",  # "google_bert_base_en" for English
+    labels=labels,
+    device='cuda:0'
+)
+
+model.fit(
+    sents_a_train=questions_train,
+    sents_b_train=answers_train,
+    labels_train=labels_train,
+    model_saving_path='./fastbert.bin',
+)
+
+# Loading model and making inference
+model.load_model('./fastbert.bin')
+label, exec_layers = model(
+    sent_a='我也要用FastBERT!',
+    sent_b='来，吃老干妈!',
+    speed=0.7)
 ```
 
 

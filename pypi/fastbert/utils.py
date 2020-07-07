@@ -14,6 +14,7 @@ import urllib
 import hashlib
 from functools import partial
 import ssl
+from .config import FASTBERT_HOME_DIR
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
@@ -36,25 +37,28 @@ def load_hyperparam(config_path,
         param = json.load(f)
         for key, value in param.items():
             if isinstance(key, str) and key.endswith('_path'):
-                param[key] = os.path.join(file_dir, value)
+                if isinstance(value, str) and value.endswith('.bin'):
+                    param[key] = os.path.join(FASTBERT_HOME_DIR, value)
+                else:
+                    param[key] = os.path.join(file_dir, value)
 
     if args is None:
         args_dict = {}
     else:
         args_dict = vars(args)
     args_dict.update(param)
-    
+
     args = Namespace(**args_dict)
     return args
 
 
-def cbk_for_urlretrieve(a, b, c):    
+def cbk_for_urlretrieve(a, b, c):
     '''
     Callback function for showing process
-    '''    
-    per = 100.0 * a * b / c    
-    if per > 100:        
-        per = 100 
+    '''
+    per = 100.0 * a * b / c
+    if per > 100:
+        per = 100
     print('\r%.1f%% of %.2fM' % (per,c/(1024*1024)), end='')
 
 

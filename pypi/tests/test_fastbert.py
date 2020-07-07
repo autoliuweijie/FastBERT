@@ -1,7 +1,7 @@
 # coding: utf-8
 import sys
 sys.path.append("../")
-from fastbert import FastBERT
+from fastbert import FastBERT_S2
 
 
 def load_dataset(path):
@@ -29,10 +29,11 @@ def main():
     sents_dev, labels_dev = load_dataset(dev_dataset_path)
     sents_test, labels_test = load_dataset(test_dataset_path)
 
-    model = FastBERT("google_bert_base_zh", labels=labels, device='cpu')
+    model = FastBERT_S2("google_bert_base_zh", labels=labels, device='cuda:0')
     model.show()
 
     model.fit(
+        sents_train,
         sents_train,
         labels_train,
         sentences_dev=sents_dev,

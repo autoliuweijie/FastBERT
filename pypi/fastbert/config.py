@@ -6,7 +6,9 @@ __version__ = "0.0.0"
 
 
 LIB_DIR = os.path.dirname(os.path.abspath(__file__))
+USER_HOME_DIR = os.path.expanduser('~')
 FILES_DIR = os.path.join(LIB_DIR, 'files/')
+FASTBERT_HOME_DIR = os.path.join(USER_HOME_DIR, '.fastbert/')
 TMP_DIR = '/tmp/'
 
 

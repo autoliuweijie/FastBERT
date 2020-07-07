@@ -556,3 +556,129 @@ class FastBERT(nn.Module):
         for k, v in vars(self.args).items():
             print("{}: {}".format(k, v))
 
+
+class FastBERT_S2(FastBERT):
+
+    def __init__(self,
+                 kernel_name,
+                 labels,
+                 **kwargs):
+        super(FastBERT_S2, self).__init__(
+            kernel_name,
+            labels,
+            **kwargs)
+        self.sep_tag = '[SEP]'
+        self.sep_id = self.vocab.get(self.sep_tag)
+        self.max_single_length = self.args.seq_length // 2
+
+    def fit(self,
+            sents_a_train,
+            sents_b_train,
+            labels_train,
+            verbose=True,
+            **kwargs):
+        """
+        Fine-tuning and self-distilling the FastBERT model.
+
+        args:
+            sents_a_train - list - a list of training A-sentences.
+            sents_b_train - list - a list of training B-sentences.
+            labels_train - list - a list of training labels.
+            batch_size - int - batch_size for training.
+            sents_a_dev - list - a list of evaluating A-sentences.
+            sents_b_dev - list - a list of evaluating B-sentences.
+            labels_dev - list - a list of validation labels.
+            learning_rate - float - learning rate.
+            finetuning_epochs_num - int - the epoch number of finetuning.
+            distilling_epochs_num - int - the epoch number of distilling.
+            report_steps - int - Report the training process every [report_steps] steps.
+            warmup - float - the warmup rate for training.
+            dev_speed - float - the speed for evaluating in the self-distilling process.
+            model_saving_path - str - the path to saving model.
+        """
+
+        sentences_train = self._merge_batch(sents_a_train, sents_b_train)
+
+        sents_a_dev, sents_b_dev = kwargs.pop('sents_a_dev', []), kwargs.pop('sents_b_dev', [])
+        sentences_dev = self._merge_batch(sents_a_dev, sents_b_dev)
+        labels_dev = kwargs.pop('labels_dev', [])
+
+        super(FastBERT_S2, self).fit(
+                sentences_train, 
+                labels_train, 
+                sentences_dev=sentences_dev,
+                labels_dev=labels_dev,
+                verbose=verbose,
+                **kwargs) 
+
+    def forward(self,
+                sent_a,
+                sent_b,
+                speed=0.0):
+        """
+        Predict labels for the input sent_a and sent_b.
+
+        Input:
+            sent_a - str - the input A-sentence.
+            sent_b - str - the input B-sentence.
+            speed - float - the speed value (0.0~1.0)
+        Return:
+            label - str/int - the predict label.
+            exec_layer_num - int - the number of the executed layers.
+        """
+        sent = self.merge(sent_a, sent_b)
+        label, exec_layer_num = super(FastBERT_S2, self).forward(sent, speed)
+        return label, exec_layer_num
+
+    def self_distill(self,
+                     sents_a_train,
+                     sents_b_train,
+                     model_saving_path,
+                     sentences_dev=[],
+                     labels_dev=[],
+                     batch_size=32,
+                     learning_rate=1e-4,
+                     warmup=0.1,
+                     epochs_num=5,
+                     report_steps=100,
+                     dev_speed=0.5,
+                     verbose=True):
+        """
+        Self-distilling the FastBERT model.
+
+        args:
+            sents_a_train - list - a list of B-sentences for training
+            sents_b_train - list - a list of B-sentences for training
+            batch_size - int - batch_size for training.
+            sentences_dev - list - a list of validation sentences.
+            labels_dev - list - a list of validation labels.
+            learning_rate - float - learning rate.
+            finetuning_epochs_num - int - the epoch number of finetuning.
+            distilling_epochs_num - int - the epoch number of distilling.
+            report_steps - int - Report the training process every [report_steps] steps.
+            warmup - float - the warmup rate for training.
+            dev_speed - float - the speed for evaluating in the self-distilling process.
+            model_saving_path - str - the path to saving model.
+            verbose - bool- whether print infos.
+        """
+        sentences_train = self._merge_batch(sents_a_train, sents_b_train)
+        super(FastBERT_S2, self).self_distill(
+                sentences_train,
+                model_saving_path,
+                **kwargs)
+
+    def _merge_batch(self,
+               sents_a_batch,
+               sents_b_batch):
+        sentences_batch = []
+        for sent_a, sent_b in zip(sents_a_batch, sents_b_batch):
+            sentences_batch.append(self._merge(sent_a, sent_b))
+        return sentences_batch
+
+    def _merge(self,
+               sent_a,
+               sent_b):
+        sent = sent_a[:self.max_single_length] + self.sep_tag + sent_b[:self.max_single_length]
+        return sent
+
+
