@@ -432,7 +432,7 @@ class FastBERT(nn.Module):
                 scheduler.step()
 
             dev_acc, _ = self._evaluate(sentences_dev, labels_dev, speed=0.0) \
-                    if dev_num > 0 else 0.0
+                    if dev_num > 0 else (0.0, 0.0)
             train_acc, _ = self._evaluate(sentences_train, labels_train, speed=0.0)
             if verbose:
                 print("[FastBERT]: Evaluating at fine-tuning epoch {}/{}".\
@@ -543,7 +543,7 @@ class FastBERT(nn.Module):
                 scheduler.step()
 
             dev_acc, ave_layers = self._evaluate(sentences_dev, labels_dev, speed=0.5) \
-                    if dev_num > 0 else 0.0
+                    if dev_num > 0 else (0.0, 0)
             print("[FastBERT]: Evaluating at self-disilling epoch {}/{}".\
                     format(epoch+1, epochs_num),
                     "dev_acc = {:.3f}, ave_exec_layers = {:.3f}".format(dev_acc, ave_layers))
