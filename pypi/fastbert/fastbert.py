@@ -289,8 +289,7 @@ class FastBERT(nn.Module):
                     break
 
         label_id = torch.argmax(probs, dim=1).item()
-        label = self.id2label[label_id]
-        return label, exec_layer_num
+        return label_id, exec_layer_num
 
     def _forward_for_loss(self,
                           sentences_batch,
@@ -604,12 +603,12 @@ class FastBERT_S2(FastBERT):
         labels_dev = kwargs.pop('labels_dev', [])
 
         super(FastBERT_S2, self).fit(
-                sentences_train, 
-                labels_train, 
+                sentences_train,
+                labels_train,
                 sentences_dev=sentences_dev,
                 labels_dev=labels_dev,
                 verbose=verbose,
-                **kwargs) 
+                **kwargs)
 
     def forward(self,
                 sent_a,
@@ -626,7 +625,7 @@ class FastBERT_S2(FastBERT):
             label - str/int - the predict label.
             exec_layer_num - int - the number of the executed layers.
         """
-        sent = self.merge(sent_a, sent_b)
+        sent = self._merge(sent_a, sent_b)
         label, exec_layer_num = super(FastBERT_S2, self).forward(sent, speed)
         return label, exec_layer_num
 
