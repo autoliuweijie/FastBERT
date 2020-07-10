@@ -102,7 +102,8 @@ class FastBERT(nn.Module):
                 kernel_name,
                 self.args.pretrained_model_url_bak)
         self.kernel.load_state_dict(
-                torch.load(self.args.pretrained_model_path),strict=False)
+                torch.load(self.args.pretrained_model_path, 
+                    map_location=self.args.device), strict=False)
 
         # create teacher and student classifiers
         self.classifiers = nn.ModuleList([

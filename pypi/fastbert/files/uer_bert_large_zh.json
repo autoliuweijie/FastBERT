@@ -1,0 +1,16 @@
+{
+    "emb_size": 1024,
+    "feedforward_size": 4096,
+    "hidden_size": 1024,
+    "heads_num": 16,
+    "layers_num": 24,
+    "dropout": 0.1,
+    "embedding": "bert",
+    "encoder": "bert",
+    "pooling": "first",
+    "vocab_path": "google_zh_vocab.txt",
+    "pretrained_model_path": "uer_bert_large_zh.bin",
+    "pretrained_model_md5": "5452e42107d97ae25eb29b96dba4e7f9",
+    "pretrained_model_url": "https://fastbert-model-file-1257235592.cos.ap-beijing.myqcloud.com/uer_bert_large_zh.bin",
+    "pretrained_model_url_bak": "https://share.weiyun.com/chx2VhGk"
+}

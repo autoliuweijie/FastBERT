@@ -14,7 +14,8 @@ TMP_DIR = '/tmp/'
 
 MODEL_CONFIG_FILE = {
         'google_bert_base_en': os.path.join(FILES_DIR, 'google_bert_base_en.json'),
-        'google_bert_base_zh': os.path.join(FILES_DIR, 'google_bert_base_zh.json')
+        'google_bert_base_zh': os.path.join(FILES_DIR, 'google_bert_base_zh.json'),
+        'uer_bert_large_zh': os.path.join(FILES_DIR, 'uer_bert_large_zh.json')
     }
 
 DEFAULT_SEQ_LENGTH = 128

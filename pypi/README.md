@@ -10,6 +10,20 @@ Install ``fastbert`` with ``pip``.
 $ pip install fastbert
 ```
 
+
+## Supported Models
+
+FastBERT is supported by the [UER](https://github.com/dbiir/UER-py) project, and all of UER high-quality models can be accelerated in the FastBERT way.
+
+|Models (kernel_name)  |URL                               |Description                                               |
+|----------------------|----------------------------------|----------------------------------------------------------|
+|google_bert_base_en   |https://share.weiyun.com/fpdOtcmz | Google pretrained English BERT-base model on Wiki corpus.|
+|google_bert_base_zh   |https://share.weiyun.com/AykBph9V | Google pretrained Chinese BERT-base model on Wiki corpus.|
+|UER_bert_large_zh     |https://share.weiyun.com/chx2VhGk | UER pretrained Chinese BERT-large model on mixed corpus. |
+
+In fact, you don't have to download the model yourself. FastBERT will download the corresponding model file automatically at the first time you use it. If the automatically downloading failed, you can download these model files from the above URLs, and saving them to the directory of "~/.fastbert/".
+
+
 ## Quick Start
 
 ### Single sentence classification
@@ -32,26 +46,29 @@ labels_train = [
     ...
 ]
 
-# Creating and training model
+# Creating a model
 model = FastBERT(
     kernel_name="google_bert_base_en",  # "google_bert_base_zh" for Chinese
     labels=labels,
     device='cuda:0'
 )
 
+# Training the model
 model.fit(
     sents_train,
     labels_train,
     model_saving_path='./fastbert.bin',
 )
 
-# Loading model and making inference
+# Loading the model and making inference
 model.load_model('./fastbert.bin')
 label, exec_layers = model('I like FastBERT', speed=0.7)
 ```
 
 
 ### Two sentences classification
+
+An example of two sentences classification are presented in [two_sentences_classification](examples/two_sentences_classification/).
 
 ```python
 from fastbert import FastBERT_S2
@@ -74,13 +91,14 @@ labels_train = [
     ...
 ]
 
-# Creating and training model
+# Creating a model
 model = FastBERT_S2(
     kernel_name="google_bert_base_zh",  # "google_bert_base_en" for English
     labels=labels,
     device='cuda:0'
 )
 
+# Training the model
 model.fit(
     sents_a_train=questions_train,
     sents_b_train=answers_train,
@@ -88,7 +106,7 @@ model.fit(
     model_saving_path='./fastbert.bin',
 )
 
-# Loading model and making inference
+# Loading the model and making inference
 model.load_model('./fastbert.bin')
 label, exec_layers = model(
     sent_a='我也要用FastBERT!',
