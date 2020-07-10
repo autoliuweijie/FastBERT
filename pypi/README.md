@@ -10,7 +10,9 @@ Install ``fastbert`` with ``pip``.
 $ pip install fastbert
 ```
 
-## Single sentence classification
+## Quick Start
+
+### Single sentence classification
 
 An example of single sentence classification are shown in [single_sentence_classification](examples/single_sentence_classification/).
 
@@ -49,7 +51,7 @@ label, exec_layers = model('I like FastBERT', speed=0.7)
 ```
 
 
-## Two sentences classification
+### Two sentences classification
 
 ```python
 from fastbert import FastBERT_S2
@@ -93,5 +95,68 @@ label, exec_layers = model(
     sent_b='来，吃老干妈!',
     speed=0.7)
 ```
+
+
+## Usage
+
+Args of ``FastBERT``/``FastBERT_S2``:
+
+|Args|Type|Examples|Explanation|
+|----|----|--------|-----------|
+|kernel_name|str|'google_bert_base_en'|The name of the kernel model, including 'google_bert_base_en', 'google_bert_base_zh'.|
+|labels|list|['T', 'F']| A list of all labels.|
+|seq_length (optional)|int|256| The sentence length for FastBERT. Default 128|
+|device (optional)|str|'cuda:0'| The device for runing FastBERT, default 'cpu'|
+
+Args of ``FastBERT.fit()``:
+
+|Args|Type|Examples|Explanation|
+|----|----|--------|-----------|
+|sentences_train |list|['sent 1', 'sent 2',...] | A list of training sentences.|
+|labels_train | list |['T', 'F', ...] | A list of training labels.|
+|batch_size (optional)| int | 32| batch_size for training. Default 16|
+|sentences_dev (optional)| list | [] | A list of validation sentences.|
+|labels_dev (optional) | list | [] | A list of validation labels.|
+|learning_rate (optional) | float | 2e-5 | learning rate.|
+|finetuning_epochs_num (optional) | int | 5 | The epoch number of finetuning.|
+|distilling_epochs_num (optional) | int | 10| The epoch number of distilling.|
+|report_steps (optional) | int |100 | Report the training process every [report_steps] steps.|
+|warmup (optional) | float | 0.1 |The warmup rate for training.|
+|dev_speed (optional) | float | 0.5 | The speed for evaluating in the self-distilling process.|
+|model_saving_path (optional) | str | './model.bin' | The path to saving model. |
+
+Args of ``FastBERT.forward()``:
+
+|Args|Type|Examples|Explanation|
+|----|----|--------|-----------|
+|sentence | str | 'How are you' | The input sentence.|
+|speed (optional) | float | 0.5 | The speed value for inference. Default 0.0.|
+
+Args of ``FastBERT_S2.fit()``:
+
+|Args|Type|Examples|Explanation|
+|----|----|--------|-----------|
+|sents_a_train |list|['sent a 1', 'sent a 2',...] | A list of training A-sentences.|
+|sents_b_train |list|['sent b 1', 'sent b 2',...] | A list of training B-sentences.|
+|labels_train | list |['T', 'F', ...] | A list of training labels.|
+|batch_size (optional)| int | 32| batch_size for training. Default 16|
+|sents_a_dev (optional)| list | [] | A list of validation A-sentences.|
+|sents_b_dev (optional)| list | [] | A list of validation B-sentences.|
+|labels_dev (optional) | list | [] | A list of validation labels.|
+|learning_rate (optional) | float | 2e-5 | learning rate.|
+|finetuning_epochs_num (optional) | int | 5 | The epoch number of finetuning.|
+|distilling_epochs_num (optional) | int | 10| The epoch number of distilling.|
+|report_steps (optional) | int |100 | Report the training process every [report_steps] steps.|
+|warmup (optional) | float | 0.1 |The warmup rate for training.|
+|dev_speed (optional) | float | 0.5 | The speed for evaluating in the self-distilling process.|
+|model_saving_path (optional) | str | './model.bin' | The path to saving model. |
+
+Args of ``FastBERT_S2.forward()``:
+
+|Args|Type|Examples|Explanation|
+|----|----|--------|-----------|
+|sents_a | str | 'How are you' | The input A-sentence.|
+|sents_b | str | 'How are you' | The input B-sentence.|
+|speed (optional) | float | 0.5 | The speed value for inference. Default 0.0.|
 
 

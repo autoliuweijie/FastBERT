@@ -155,6 +155,9 @@ class FastBERT(nn.Module):
         tmp_model_saving_path = os.path.join(TMP_DIR, 'FastBERT_tmp.bin')
         model_saving_path = kwargs.get('model_saving_path', tmp_model_saving_path)
 
+        assert len(sentences_train) == len(labels_train)
+        assert len(sentences_dev) == len(labels_dev)
+
         self._fine_tuning_backbone(
             sentences_train, labels_train, sentences_dev, labels_dev,
             batch_size, learning_rate, finetuning_epochs_num,
@@ -542,10 +545,10 @@ class FastBERT(nn.Module):
                 optimizer.step()
                 scheduler.step()
 
-            dev_acc, ave_layers = self._evaluate(sentences_dev, labels_dev, speed=0.5) \
-                    if dev_num > 0 else (0.0, 0)
-            print("[FastBERT]: Evaluating at self-disilling epoch {}/{}".\
-                    format(epoch+1, epochs_num),
+            dev_acc, ave_layers = self._evaluate(sentences_dev, labels_dev, \
+                    speed=dev_speed) if dev_num > 0 else (0.0, 0)
+            print("[FastBERT]: Evaluating at self-disilling epoch {}/{} at {} speed".\
+                    format(epoch+1, epochs_num, dev_speed),
                     "dev_acc = {:.3f}, ave_exec_layers = {:.3f}".format(dev_acc, ave_layers))
             save_model(self, model_saving_path)
             print("[FastBERT]: Saving model to {}".format(model_saving_path))

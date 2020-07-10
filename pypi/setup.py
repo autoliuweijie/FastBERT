@@ -10,7 +10,7 @@ package_data = {'fastbert.files': ['fastbert/files/*.json', 'fastbert/files/*.tx
 
 setuptools.setup(
     name="fastbert", # Replace with your own username
-    version="0.0.7",
+    version="0.0.8",
     author="Weijie Liu",
     author_email="autoliuweijie@163.com",
     description="The pipy version of FastBERT",
