@@ -445,7 +445,7 @@ class FastBERT(nn.Module):
                 format(train_acc, dev_acc))
 
             if dev_num > 0:
-                if dev_acc > best_acc:
+                if dev_acc >= best_acc:
                     # saving model
                     if verbose:
                         print("[FastBERT]: dev_acc ({}) > best_acc ({}),".\
@@ -455,7 +455,7 @@ class FastBERT(nn.Module):
                     save_model(self, model_saving_path)
                     best_acc = dev_acc
             else:
-                if train_acc > best_acc:
+                if train_acc >= best_acc:
                     if verbose:
                         print("[FastBERT]: train_acc ({}) > best_acc ({}),".\
                               format(train_acc, best_acc),
@@ -478,7 +478,8 @@ class FastBERT(nn.Module):
         right_count = 0
         exec_layers = []
         for sent, label in zip(sentences_batch, labels_batch):
-            label_pred, el = self._fast_infer(sent, speed=speed)
+            label_id_pred, el = self._fast_infer(sent, speed=speed)
+            label_pred = self.id2label[label_id_pred]
             exec_layers.append(el)
             if label == label_pred:
                 right_count += 1
