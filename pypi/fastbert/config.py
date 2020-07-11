@@ -2,7 +2,7 @@
 import os
 
 
-__version__ = "0.0.0"
+__version__ = "0.1.0"
 
 
 LIB_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,11 +13,14 @@ TMP_DIR = '/tmp/'
 
 
 MODEL_CONFIG_FILE = {
-        'google_bert_base_en': os.path.join(FILES_DIR, 'google_bert_base_en.json'),
-        'google_bert_base_zh': os.path.join(FILES_DIR, 'google_bert_base_zh.json'),
-        'uer_bert_large_zh': os.path.join(FILES_DIR, 'uer_bert_large_zh.json')
-    }
+    'google_bert_base_en': os.path.join(FILES_DIR, 'google_bert_base_en.json'),
+    'google_bert_base_zh': os.path.join(FILES_DIR, 'google_bert_base_zh.json'),
+    'uer_bert_large_zh': os.path.join(FILES_DIR, 'uer_bert_large_zh.json'),
+    'uer_bert_small_zh': os.path.join(FILES_DIR, 'uer_bert_small_zh.json'),
+    'uer_bert_tiny_zh': os.path.join(FILES_DIR, 'uer_bert_tiny_zh.json')
+}
 
-DEFAULT_SEQ_LENGTH = 128
-DEFAULT_DEVICE = 'cpu'
+
+DEFAULT_SEQ_LENGTH = 128  # Default sentence length.
+DEFAULT_DEVICE = 'cpu'  # Default device.
 

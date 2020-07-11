@@ -36,7 +36,7 @@ def main():
     print("Labels: ", labels)  # [0, 1]
 
     model = FastBERT_S2(
-        kernel_name="google_bert_base_en",
+        kernel_name="uer_bert_small_zh",
         labels=labels,
         device="cuda:0" if torch.cuda.is_available() else "cpu"
     )
@@ -51,6 +51,7 @@ def main():
         finetuning_epochs_num=3,
         distilling_epochs_num=5,
         learning_rate=1e-4,
+        report_steps=10,
         model_saving_path=model_saving_path,
         verbose=True,
     )

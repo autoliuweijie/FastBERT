@@ -20,6 +20,8 @@ FastBERT is supported by the [UER](https://github.com/dbiir/UER-py) project, and
 |google_bert_base_en   |https://share.weiyun.com/fpdOtcmz | Google pretrained English BERT-base model on Wiki corpus.|
 |google_bert_base_zh   |https://share.weiyun.com/AykBph9V | Google pretrained Chinese BERT-base model on Wiki corpus.|
 |uer_bert_large_zh     |https://share.weiyun.com/chx2VhGk | UER pretrained Chinese BERT-large model on mixed corpus. |
+|uer_bert_small_zh     |https://share.weiyun.com/wZuVBM5g | UER pretrained Chinese BERT-small model on mixed corpus. |
+|uer_bert_tiny_zh      |https://share.weiyun.com/VJ3JEN9Z | UER pretrained Chinese BERT-tiny model on mixed corpus.  |
 
 In fact, you don't have to download the model yourself. FastBERT will download the corresponding model file automatically at the first time you use it. If the automatically downloading failed, you can download these model files from the above URLs, and saving them to the directory of "~/.fastbert/".
 

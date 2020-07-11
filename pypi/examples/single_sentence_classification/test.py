@@ -22,7 +22,7 @@ def main():
     samples_num = len(sents_test)
 
     model = FastBERT(
-        kernel_name="google_bert_base_zh",
+        kernel_name="uer_bert_tiny_zh",
         labels=labels,
         device="cuda:0" if torch.cuda.is_available() else "cpu"
     )
