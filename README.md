@@ -8,6 +8,11 @@ Source code for ["FastBERT: a Self-distilling BERT with Adaptive Inference Time"
 
 **2020/07/05 - Update**: Pypi version of FastBERT has been launched. Please see [fastbert-pypi](https://pypi.org/project/fastbert/).
 
+Install ``fastbert`` with ``pip``
+```sh
+$ pip install fastbert
+```
+
 
 ## Requirements
 
