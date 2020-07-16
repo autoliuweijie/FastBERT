@@ -20,6 +20,7 @@ def main():
 
     sents_test, labels_test = loading_dataset(test_dataset_path)
     samples_num = len(sents_test)
+    labels = ["0", "1"]
 
     model = FastBERT(
         kernel_name="uer_bert_tiny_zh",
