@@ -5,9 +5,11 @@ douban_book_review dataset.
 
 @author: Weijie Liu
 """
-import os
+import os, sys
+fastbert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+sys.path.append(fastbert_dir)
 import torch
-from fastbert import FastBERT
+from fastbert import FastBERT, FastGPT
 
 
 train_dataset_path = "../../datasets/douban_book_review/train.tsv"
@@ -34,11 +36,19 @@ def main():
     labels = ["0", "1"]
     print("Labels: ", labels)  # [0, 1]
 
+    # FastBERT model
     model = FastBERT(
         kernel_name="uer_bert_tiny_zh",
         labels=labels,
         device="cuda:0" if torch.cuda.is_available() else "cpu"
     )
+
+    # # FastGPT model
+    # model = FastGPT(
+    #     kernel_name="uer_gpt_zh",
+    #     labels=labels,
+    #    device="cuda:0" if torch.cuda.is_available() else "cpu"
+    # )
 
     model.fit(
         sents_train,
@@ -47,7 +57,7 @@ def main():
         labels_dev=labels_dev,
         finetuning_epochs_num=3,
         distilling_epochs_num=5,
-        report_steps=10,
+        report_steps=100,
         model_saving_path=model_saving_path,
         verbose=True,
     )

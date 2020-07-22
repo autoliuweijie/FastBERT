@@ -17,7 +17,9 @@ MODEL_CONFIG_FILE = {
     'google_bert_base_zh': os.path.join(FILES_DIR, 'google_bert_base_zh.json'),
     'uer_bert_large_zh': os.path.join(FILES_DIR, 'uer_bert_large_zh.json'),
     'uer_bert_small_zh': os.path.join(FILES_DIR, 'uer_bert_small_zh.json'),
-    'uer_bert_tiny_zh': os.path.join(FILES_DIR, 'uer_bert_tiny_zh.json')
+    'uer_bert_tiny_zh': os.path.join(FILES_DIR, 'uer_bert_tiny_zh.json'),
+    'uer_gpt_zh': os.path.join(FILES_DIR, 'uer_gpt_zh.json'),
+    'uer_gpt_en': os.path.join(FILES_DIR, 'uer_gpt_en.json'),
 }
 
 

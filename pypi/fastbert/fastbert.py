@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import random
+import time
 from .config import *
 from .utils import *
 from .uer.utils.tokenizer import BertTokenizer
@@ -15,13 +16,13 @@ from .uer.model_saver import save_model
 from .uer.model_loader import load_model
 
 
-class MiniClassifier(nn.Module):
+class BertMiniClassifier(nn.Module):
 
     def __init__(self,
                  args,
                  input_size,
                  labels_num):
-        super(MiniClassifier, self).__init__()
+        super(BertMiniClassifier, self).__init__()
         self.input_size = input_size
         self.cla_hidden_size = 128
         self.cla_heads_num = 2
@@ -52,6 +53,8 @@ class MiniClassifier(nn.Module):
 
 
 class FastBERT(nn.Module):
+
+    MiniClassifier = BertMiniClassifier
 
     def __init__(self,
                  kernel_name,
@@ -107,7 +110,7 @@ class FastBERT(nn.Module):
 
         # create teacher and student classifiers
         self.classifiers = nn.ModuleList([
-            MiniClassifier(self.args, self.args.hidden_size, self.labels_num)\
+            self.MiniClassifier(self.args, self.args.hidden_size, self.labels_num)\
             for i in range(self.kernel.encoder.layers_num)
          ])
 
@@ -137,12 +140,13 @@ class FastBERT(nn.Module):
             finetuning_epochs_num - int - the epoch number of finetuning.
             distilling_epochs_num - int - the epoch number of distilling.
             report_steps - int - Report the training process every [report_steps] steps.
+            training_sample_rate - float - the sampling rate for evaluating on training dataset.
             warmup - float - the warmup rate for training.
             dev_speed - float - the speed for evaluating in the self-distilling process.
             model_saving_path - str - the path to saving model.
         """
         if verbose:
-            print("[FastBERT]: Training FastBERT")
+            self._print("Start Training.")
 
         batch_size = kwargs.get('batch_size', 16)
         sentences_dev = kwargs.get('sentences_dev', [])
@@ -153,6 +157,7 @@ class FastBERT(nn.Module):
         report_steps = kwargs.get('report_steps', 100)
         warmup = kwargs.get('warmup', 0.1)
         dev_speed = kwargs.get('dev_speed', 0.5)
+        training_sample_rate = kwargs.get('training_sample_rate', 0.1)
         tmp_model_saving_path = os.path.join(TMP_DIR, 'FastBERT_tmp.bin')
         model_saving_path = kwargs.get('model_saving_path', tmp_model_saving_path)
 
@@ -162,7 +167,8 @@ class FastBERT(nn.Module):
         self._fine_tuning_backbone(
             sentences_train, labels_train, sentences_dev, labels_dev,
             batch_size, learning_rate, finetuning_epochs_num,
-            warmup, report_steps, model_saving_path, verbose)
+            warmup, report_steps, model_saving_path, training_sample_rate, 
+            verbose)
 
         self._self_distillation(
             sentences_train, batch_size, learning_rate*10, distilling_epochs_num,
@@ -172,7 +178,7 @@ class FastBERT(nn.Module):
 
         save_model(self, model_saving_path)
         if verbose:
-            print("[FastBERT]: Model have been saved at {}".format(model_saving_path))
+            self._print("Model have been saved at {}".format(model_saving_path))
 
     def forward(self,
                 sentence,
@@ -229,7 +235,7 @@ class FastBERT(nn.Module):
 
         save_model(self, model_saving_path)
         if verbose:
-            print("[FastBERT]: Model have been saved at {}".format(model_saving_path))
+            self._print("Model have been saved at {}".format(model_saving_path))
 
     def load_model(self,
                    model_path):
@@ -274,9 +280,7 @@ class FastBERT(nn.Module):
 
             # embedding layer
             emb = self.kernel.embedding(ids, mask)  # batch_size x seq_length x emb_size
-            mask = (mask > 0).unsqueeze(1).repeat(1, self.args.seq_length, 1).\
-                    unsqueeze(1)
-            mask = (1.0 - mask.float()) * -10000.0  # batch_size x seq_length x seq_length
+            mask = self._mask_transfer(mask, emb) # batch_size x seq_length x seq_length
 
             # hidden layers
             hidden = emb
@@ -295,6 +299,14 @@ class FastBERT(nn.Module):
         label_id = torch.argmax(probs, dim=1).item()
         return label_id, exec_layer_num
 
+    def _mask_transfer(self,
+                       mask, # batch_size x seq_length
+                       emb):
+        batch_size, seq_length, emb_size = emb.size()
+        mask = (mask > 0).unsqueeze(1).repeat(1, seq_length, 1).unsqueeze(1)
+        mask = (1.0 - mask.float()) * -10000.0  # batch_size x seq_length x seq_length
+        return mask
+
     def _forward_for_loss(self,
                           sentences_batch,
                           labels_batch=None):
@@ -310,9 +322,7 @@ class FastBERT(nn.Module):
 
         # embedding layer
         embs_batch = self.kernel.embedding(ids_batch, masks_batch)  # batch_size x seq_length x emb_size
-        masks_batch = (masks_batch > 0).unsqueeze(1).repeat(1, self.args.seq_length, 1).\
-                 unsqueeze(1)
-        masks_batch = (1.0 - masks_batch.float()) * -10000.0  # batch_size x seq_length x seq_length
+        masks_batch = self._mask_transfer(masks_batch, embs_batch)  # batch_size x seq_length x seq_length
 
         if labels_batch is not None:
 
@@ -382,10 +392,11 @@ class FastBERT(nn.Module):
                              warmup,
                              report_steps,
                              model_saving_path,
+                             training_sample_rate,
                              verbose=True):
 
         if verbose:
-            print("[FastBERT]: Fine-tuning the backbone for {} epochs using {}.". \
+            self._print("Fine-tuning the backbone for {} epochs using {}.". \
                     format(epochs_num, self.args.device))
 
         instances_num = len(sentences_train)
@@ -426,7 +437,7 @@ class FastBERT(nn.Module):
                     ave_loss = report_loss / report_steps
                     report_loss = 0.
                     if verbose:
-                        print("[FastBERT]: Fine-tuning epoch {}/{}".\
+                        self._print("Fine-tuning epoch {}/{}".\
                                 format(epoch+1, epochs_num),
                                 "step {}/{}: loss = {:.3f}". \
                                 format(step+1, steps_num, ave_loss))
@@ -437,9 +448,10 @@ class FastBERT(nn.Module):
 
             dev_acc, _ = self._evaluate(sentences_dev, labels_dev, speed=0.0) \
                     if dev_num > 0 else (0.0, 0.0)
-            train_acc, _ = self._evaluate(sentences_train, labels_train, speed=0.0)
+            train_acc, _ = self._evaluate(sentences_train, labels_train, 
+                    speed=0.0, sample_rate=training_sample_rate)
             if verbose:
-                print("[FastBERT]: Evaluating at fine-tuning epoch {}/{}".\
+                self._print("Evaluating at fine-tuning epoch {}/{}".\
                 format(epoch+1, epochs_num),
                 ": train_acc = {:.3f}, dev_acc = {:.3f}". \
                 format(train_acc, dev_acc))
@@ -448,7 +460,7 @@ class FastBERT(nn.Module):
                 if dev_acc >= best_acc:
                     # saving model
                     if verbose:
-                        print("[FastBERT]: dev_acc ({}) > best_acc ({}),".\
+                        self._print("dev_acc ({}) > best_acc ({}),".\
                               format(dev_acc, best_acc),
                               "saving model to {}.".\
                               format(model_saving_path))
@@ -457,7 +469,7 @@ class FastBERT(nn.Module):
             else:
                 if train_acc >= best_acc:
                     if verbose:
-                        print("[FastBERT]: train_acc ({}) > best_acc ({}),".\
+                        self._print("train_acc ({}) > best_acc ({}),".\
                               format(train_acc, best_acc),
                               "saving model to {}.".\
                               format(model_saving_path))
@@ -466,24 +478,29 @@ class FastBERT(nn.Module):
 
         # loading the best model
         if verbose:
-            print("[FastBERT]: Finish fine-tuning. Loading the best model from {}".\
+            self._print("Finish fine-tuning. Loading the best model from {}".\
                     format(model_saving_path))
         load_model(self, model_saving_path)
 
     def _evaluate(self,
                   sentences_batch,
                   labels_batch,
-                  speed):
-        total_num = len(sentences_batch)
+                  speed,
+                  sample_rate=1.0):
+        random_thresh = sample_rate * 100
+        total_num = 0
         right_count = 0
         exec_layers = []
         for sent, label in zip(sentences_batch, labels_batch):
+            if random.randint(0, 100) > random_thresh:
+                continue
+            total_num += 1
             label_id_pred, el = self._fast_infer(sent, speed=speed)
             label_pred = self.id2label[label_id_pred]
             exec_layers.append(el)
             if label == label_pred:
                 right_count += 1
-        acc = right_count / total_num
+        acc = right_count / total_num if total_num > 0 else 0.0
         ave_exec_layers = np.mean(exec_layers)
         return acc, ave_exec_layers
 
@@ -500,7 +517,7 @@ class FastBERT(nn.Module):
                           dev_speed=0.5,
                           verbose=True):
         if verbose:
-            print("[FastBERT]: Self-distilling for {} epochs using {}.". \
+            self._print("Self-distilling for {} epochs using {}.". \
                     format(epochs_num, self.args.device))
 
         instances_num = len(sentences_train)
@@ -538,7 +555,7 @@ class FastBERT(nn.Module):
                     ave_loss = report_loss / report_steps
                     report_loss = 0.
                     if verbose:
-                        print("[FastBERT]: Self-distilling epoch {}/{}".\
+                        self._print("Self-distilling epoch {}/{}".\
                                 format(epoch+1, epochs_num),
                                 "step {}/{}: loss = {:.3f}". \
                                 format(step+1, steps_num, ave_loss))
@@ -549,16 +566,25 @@ class FastBERT(nn.Module):
 
             dev_acc, ave_layers = self._evaluate(sentences_dev, labels_dev, \
                     speed=dev_speed) if dev_num > 0 else (0.0, 0)
-            print("[FastBERT]: Evaluating at self-disilling epoch {}/{} at {} speed".\
+            self._print("Evaluating at self-disilling epoch {}/{} at {} speed".\
                     format(epoch+1, epochs_num, dev_speed),
                     "dev_acc = {:.3f}, ave_exec_layers = {:.3f}".format(dev_acc, ave_layers))
             save_model(self, model_saving_path)
-            print("[FastBERT]: Saving model to {}".format(model_saving_path))
+            self._print("Saving model to {}".format(model_saving_path))
+
+    def _print(self,
+               *contents):
+        cls_name = self.__class__.__name__
+        t = time.localtime()
+        prefix = "[{}/{}/{}-{}:{}:{} {}]:".format(t.tm_year, t.tm_mon, t.tm_mday, \
+                t.tm_hour, t.tm_min, t.tm_sec, cls_name)
+        content = ' '.join(contents)
+        print(prefix + content)
 
     def show(self):
-        print("[FastBER]: The configs of model are listed:")
+        self._print("The configs of model are listed:")
         for k, v in vars(self.args).items():
-            print("{}: {}".format(k, v))
+            self._print("{}: {}".format(k, v))
 
 
 class FastBERT_S2(FastBERT):
@@ -595,6 +621,7 @@ class FastBERT_S2(FastBERT):
             learning_rate - float - learning rate.
             finetuning_epochs_num - int - the epoch number of finetuning.
             distilling_epochs_num - int - the epoch number of distilling.
+            training_sample_rate - float - the sampling rate for evaluating on training dataset.
             report_steps - int - Report the training process every [report_steps] steps.
             warmup - float - the warmup rate for training.
             dev_speed - float - the speed for evaluating in the self-distilling process.
