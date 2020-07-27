@@ -78,6 +78,7 @@ class FastBERT(nn.Module):
                 file_dir=FILES_DIR)
         self.args.seq_length = kwargs.get('seq_length', DEFAULT_SEQ_LENGTH)
         self.args.device = torch.device(kwargs.get('device', DEFAULT_DEVICE))
+        self.args.is_load = kwargs.get('is_load', True)
 
         assert isinstance(labels, list), "labels must be a list."
         self.label_map = {k: v for v, k in enumerate(labels)}
@@ -98,15 +99,16 @@ class FastBERT(nn.Module):
         self.args.target = 'bert'
         self.args.subword_type = 'none'
         self.kernel = build_model(self.args)
-        check_or_download(
-                self.args.pretrained_model_path,
-                self.args.pretrained_model_url,
-                self.args.pretrained_model_md5,
-                kernel_name,
-                self.args.pretrained_model_url_bak)
-        self.kernel.load_state_dict(
-                torch.load(self.args.pretrained_model_path, 
-                    map_location=self.args.device), strict=False)
+        if self.args.is_load:
+            check_or_download(
+                    self.args.pretrained_model_path,
+                    self.args.pretrained_model_url,
+                    self.args.pretrained_model_md5,
+                    kernel_name,
+                    self.args.pretrained_model_url_bak)
+            self.kernel.load_state_dict(
+                    torch.load(self.args.pretrained_model_path,
+                        map_location=self.args.device), strict=False)
 
         # create teacher and student classifiers
         self.classifiers = nn.ModuleList([
@@ -167,7 +169,7 @@ class FastBERT(nn.Module):
         self._fine_tuning_backbone(
             sentences_train, labels_train, sentences_dev, labels_dev,
             batch_size, learning_rate, finetuning_epochs_num,
-            warmup, report_steps, model_saving_path, training_sample_rate, 
+            warmup, report_steps, model_saving_path, training_sample_rate,
             verbose)
 
         self._self_distillation(
@@ -448,7 +450,7 @@ class FastBERT(nn.Module):
 
             dev_acc, _ = self._evaluate(sentences_dev, labels_dev, speed=0.0) \
                     if dev_num > 0 else (0.0, 0.0)
-            train_acc, _ = self._evaluate(sentences_train, labels_train, 
+            train_acc, _ = self._evaluate(sentences_train, labels_train,
                     speed=0.0, sample_rate=training_sample_rate)
             if verbose:
                 self._print("Evaluating at fine-tuning epoch {}/{}".\

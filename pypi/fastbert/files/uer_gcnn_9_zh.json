@@ -1,0 +1,16 @@
+{
+    "emb_size": 128,
+    "hidden_size": 807,
+    "layers_num": 9,
+    "kernel_size": 4,
+    "block_size": 2,
+    "dropout": 0.1,
+    "embedding": "bert",
+    "encoder": "gatedcnn",
+    "pooling": "max",
+    "vocab_path": "google_zh_vocab.txt",
+    "pretrained_model_path": "xxxx",
+    "pretrained_model_md5": "xxxxx",
+    "pretrained_model_url": "xxxx",
+    "pretrained_model_url_bak": "xxxx"
+}

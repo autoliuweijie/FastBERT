@@ -61,7 +61,7 @@ class FastGPT_S2(FastBERT_S2, FastGPT):
 
     def _mask_transfer(self,
                        mask,
-                       emb): 
+                       emb):
         return FastGPT._mask_transfer(self, mask, emb)
 
 

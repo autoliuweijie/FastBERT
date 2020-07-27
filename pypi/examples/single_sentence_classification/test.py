@@ -7,7 +7,7 @@ An example of using fastbert model for single sentence classificaion
 import os
 import torch
 import numpy as np
-from fastbert import FastBERT
+from fastbert import FastBERT, FastGPT
 from train import loading_dataset
 
 

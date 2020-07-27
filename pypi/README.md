@@ -24,12 +24,15 @@ FastBERT-pypi is supported by the [UER](https://github.com/dbiir/UER-py) project
 |uer_bert_large_zh     |https://share.weiyun.com/chx2VhGk | UER pretrained Chinese BERT-large model on mixed corpus. |
 |uer_bert_small_zh     |https://share.weiyun.com/wZuVBM5g | UER pretrained Chinese BERT-small model on mixed corpus. |
 |uer_bert_tiny_zh      |https://share.weiyun.com/VJ3JEN9Z | UER pretrained Chinese BERT-tiny model on mixed corpus.  |
+|facebook_roberta_zh   |not released now                  | Facebook pretrained Chinese RoBerta-base model.          |
+|facebook_roberta_en   |not released now                  | Facebook pretrained English RoBerta-base model.          |
 
 ``FastGPT`` class supports the following models:
 
 |Models (kernel_name)  |URL                               |Description                                               |
 |----------------------|----------------------------------|----------------------------------------------------------|
 |uer_gpt_zh            |https://share.weiyun.com/taZZSHqM | UER pretrained Chinese GPT model on mixed corpus.        |
+|uer_gpt_en            |not released now                  | UER pretrained English GPT model on Wikien corpus.       |
 
 
 In fact, you don't have to download the model yourself. FastBERT will download the corresponding model file automatically at the first time you use it. If the automatically downloading failed, you can download these model files from the above URLs, and saving them to the directory of "~/.fastbert/".

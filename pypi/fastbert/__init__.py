@@ -12,6 +12,7 @@ from .fastbert import FastBERT
 from .fastbert import FastBERT_S2
 from .fastgpt import FastGPT
 from .fastgpt import FastGPT_S2
+from .fastgcnn import FastGCNN
 
 
 SINGLE_SENTENCE_CLS_KERNEL_MAP = {

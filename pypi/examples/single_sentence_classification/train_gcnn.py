@@ -9,7 +9,7 @@ import os, sys
 fastbert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.append(fastbert_dir)
 import torch
-from fastbert import FastBERT, FastGPT
+from fastbert import FastBERT, FastGPT, FastGCNN
 
 
 train_dataset_path = "../../datasets/douban_book_review/train.tsv"
@@ -37,10 +37,11 @@ def main():
     print("Labels: ", labels)  # [0, 1]
 
     # FastBERT model
-    model = FastBERT(
-        kernel_name="facebook_roberta_base_zh",
+    model = FastGCNN(
+        kernel_name="uer_gcnn_base_zh",
         labels=labels,
-        device="cuda:0" if torch.cuda.is_available() else "cpu"
+        device="cuda:0" if torch.cuda.is_available() else "cpu",
+        is_load=False
     )
 
     # # FastGPT model
@@ -55,9 +56,11 @@ def main():
         labels_train,
         sentences_dev=sents_dev,
         labels_dev=labels_dev,
-        finetuning_epochs_num=3,
+        batch_size=32,
+        finetuning_epochs_num=10,
         distilling_epochs_num=5,
         report_steps=100,
+        learning_rate=1e-4,
         model_saving_path=model_saving_path,
         verbose=True,
     )
