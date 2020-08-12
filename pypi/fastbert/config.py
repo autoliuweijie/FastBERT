@@ -2,7 +2,7 @@
 import os
 
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 LIB_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,15 +15,9 @@ TMP_DIR = '/tmp/'
 MODEL_CONFIG_FILE = {
     'google_bert_base_en': os.path.join(FILES_DIR, 'google_bert_base_en.json'),
     'google_bert_base_zh': os.path.join(FILES_DIR, 'google_bert_base_zh.json'),
-    'facebook_roberta_base_zh': os.path.join(FILES_DIR, 'facebook_roberta_base_zh.json'),
-    'facebook_roberta_base_en': os.path.join(FILES_DIR, 'facebook_roberta_base_en.json'),
     'uer_bert_large_zh': os.path.join(FILES_DIR, 'uer_bert_large_zh.json'),
     'uer_bert_small_zh': os.path.join(FILES_DIR, 'uer_bert_small_zh.json'),
     'uer_bert_tiny_zh': os.path.join(FILES_DIR, 'uer_bert_tiny_zh.json'),
-    'uer_gpt_zh': os.path.join(FILES_DIR, 'uer_gpt_zh.json'),
-    'uer_gpt_en': os.path.join(FILES_DIR, 'uer_gpt_en.json'),
-    'uer_gcnn_13_zh': os.path.join(FILES_DIR, 'uer_gcnn_13_zh.json'),
-    'uer_gcnn_9_zh': os.path.join(FILES_DIR, 'uer_gcnn_9_zh.json'),
 }
 
 

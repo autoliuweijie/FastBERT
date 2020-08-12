@@ -9,7 +9,7 @@ import os, sys
 fastbert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.append(fastbert_dir)
 import torch
-from fastbert import FastBERT, FastGPT
+from fastbert import FastBERT
 
 
 train_dataset_path = "../../datasets/douban_book_review/train.tsv"
@@ -38,17 +38,10 @@ def main():
 
     # FastBERT model
     model = FastBERT(
-        kernel_name="facebook_roberta_base_zh",
+        kernel_name="uer_bert_tiny_zh",
         labels=labels,
         device="cuda:0" if torch.cuda.is_available() else "cpu"
     )
-
-    # # FastGPT model
-    # model = FastGPT(
-    #     kernel_name="uer_gpt_zh",
-    #     labels=labels,
-    #    device="cuda:0" if torch.cuda.is_available() else "cpu"
-    # )
 
     model.fit(
         sents_train,

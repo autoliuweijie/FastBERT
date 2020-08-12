@@ -4,10 +4,12 @@ An example of using fastbert model for single sentence classificaion
 
 @author: weijie liu
 """
-import os
+import os, sys
+fastbert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+sys.path.append(fastbert_dir)
 import torch
 import numpy as np
-from fastbert import FastBERT, FastGPT
+from fastbert import FastBERT
 from train import loading_dataset
 
 

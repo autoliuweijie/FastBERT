@@ -10,7 +10,7 @@ import torch
 import sys
 fastbert_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.append(fastbert_dir)
-from fastbert import FastBERT_S2, FastGPT_S2
+from fastbert import FastBERT_S2
 
 
 train_dataset_path = "../../datasets/lcqmc/train.tsv"
