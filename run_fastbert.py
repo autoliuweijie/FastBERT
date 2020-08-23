@@ -26,37 +26,6 @@ from thop import profile
 
 
 torch.set_num_threads(1)
-#use the KLDivLoss
-#class LabelSmoothingLoss(nn.Module):
-#    def __init__(self, classes, smoothing=0.0, dim=-1):
-#        super(LabelSmoothing, self).__init__()
-#        self.criterion = nn.KLDivLoss(reduction='batchmean')
-#        self.confidence = 1.0 - smoothing
-#        self.smoothing = smoothing
-#        self.classes = classes
-#    def forward(self, pred, target):
-#        pred = nn.LogSoftmax(pred)
-#        with torch.no_grad():
-#            true_dist = torch.zeros_like(pred)
-#            true_dist.fill_(self.smoothing / (self.classes - 1))
-#            true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
-#        return self.criterion(pred, true_dist)
-
-#use the CrossEntropyLoss
-class LabelSmoothingLoss(nn.Module):
-    def __init__(self, classes, smoothing=0.0, dim=-1):
-        super(LabelSmoothingLoss, self).__init__()
-        self.confidence = 1.0 - smoothing
-        self.smoothing = smoothing
-        self.classes = classes
-        self.dim = dim
-    def forward(self, pred, target):
-        pred = pred.log_softmax(dim=self.dim)
-        with torch.no_grad():
-            true_dist = torch.zeros_like(pred)
-            true_dist.fill_(self.smoothing / (self.classes - 1))
-            true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
-        return torch.mean(torch.sum(-true_dist * pred, dim=self.dim))
 
 
 def normal_shannon_entropy(p, labels_num):
@@ -110,8 +79,7 @@ class FastBertClassifier(nn.Module):
                 for i in range(self.encoder.layers_num)
              ])
         self.softmax = nn.LogSoftmax(dim=-1)
-        #self.criterion = nn.NLLLoss()
-        self.criterion = LabelSmoothingLoss(self.labels_num, args.labelsmoothing, -1)
+        self.criterion = nn.NLLLoss()
         self.soft_criterion = nn.KLDivLoss(reduction='batchmean')
         self.threshold = args.speed
 
@@ -143,7 +111,7 @@ class FastBertClassifier(nn.Module):
                 for i in range(self.encoder.layers_num):
                     hidden = self.encoder.transformer[i](hidden, mask)
                 logits = self.classifiers[-1](hidden, mask)
-                loss = self.criterion(logits.view(-1, self.labels_num), label.view(-1))
+                loss = self.criterion(self.softmax(logits.view(-1, self.labels_num)), label.view(-1))
                 return loss, logits
             else:
                 # distillate the subclassifiers
@@ -260,8 +228,6 @@ def main():
                         help="Learning rate.")
     parser.add_argument("--warmup", type=float, default=0.1,
                         help="Warm up value.")
-    # labelsmoothing
-    parser.add_argument("--labelsmoothing", type=float, default=0.0, help="the value of label smoothing")
 
     # Training options.
     parser.add_argument("--dropout", type=float, default=0.5,
