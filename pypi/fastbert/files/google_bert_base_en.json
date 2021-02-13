@@ -11,6 +11,6 @@
     "vocab_path": "google_uncased_en_vocab.txt",
     "pretrained_model_path": "google_bert_base_en.bin",
     "pretrained_model_md5": "a634087effb2f4452c8825de829fbe03",
-    "pretrained_model_url": "https://fastbert-model-file-1257235592.cos.ap-beijing.myqcloud.com/google_bert_base_en.bin",
+    "pretrained_model_url": "http://www.weijieliu.com/download/papers/fastbert/google_bert_base_en.bin",
     "pretrained_model_url_bak": "https://share.weiyun.com/fpdOtcmz"
 }
