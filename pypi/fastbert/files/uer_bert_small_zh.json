@@ -11,6 +11,6 @@
     "vocab_path": "google_zh_vocab.txt",
     "pretrained_model_path": "uer_bert_small_zh.bin",
     "pretrained_model_md5": "e1f9488cde635782ff354ec31d665ea9",
-    "pretrained_model_url": "http://www.weijieliu.com/download/papers/fastbert/uer_bert_small_zh.bin",
+    "pretrained_model_url": "http://82.156.164.107/download/papers/fastbert/uer_bert_small_zh.bin",
     "pretrained_model_url_bak": "https://share.weiyun.com/wZuVBM5g"
 }
