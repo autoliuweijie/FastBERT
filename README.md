@@ -6,6 +6,8 @@ Source code for ["FastBERT: a Self-distilling BERT with Adaptive Inference Time"
 
 ## Good News
 
+**2021/10/29 - Code**: Code of FastPLM is released on both [Pypi](https://pypi.org/project/fastplm/) and [Github](https://github.com/autoliuweijie/FastPLM).
+**2021/09/08 - Paper**: Journal version of FastBERT (FastPLM) is accepted by IEEE TNNLS. ["An Empirical Study on Adaptive Inference for Pretrained Language Model"](https://ieeexplore.ieee.org/document/9585316).
 **2020/07/05 - Update**: Pypi version of FastBERT has been launched. Please see [fastbert-pypi](https://pypi.org/project/fastbert/).
 
 Install ``fastbert`` with ``pip``
